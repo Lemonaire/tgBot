@@ -1,3 +1,38 @@
+const questions = require('./verifyingQuestions.js');
+const config = require('./config.js');
+
+const lemonsterDiscussChatId = config.lemonsterDiscussChatId;
+const testDiscussChatId = config.testDiscussChatId;
+const lemonsterChannelId = config.lemonsterChannelId;
+const testChannelId = config.testChannelId;
+
+
+//select biology questions
+function getQuestion(){
+	var qNum = Math.round(Math.random() * 61);
+	return questions.bioQuestions[qNum];
+}
+
+function getDiscussId(msg){
+	var chatId;
+	switch(msg.chat.id) {
+	case testChannelId:
+		chatId = testDiscussChatId;
+		break;
+	case lemonsterChannelId:
+		chatId = lemonsterDiscussChatId;
+		break;
+	default:
+		chatId = null;
+		break;
+	}
+	return chatId;
+}
+	
+
+
+
+
 //isset
 function isset(a){
   if ('undefined' === typeof a ) return false;
@@ -45,4 +80,6 @@ module.exports = {
 	isset,
 	htmlDecode,
 	htmlEncode,
+	getQuestion,
+	getDiscussId,
 }

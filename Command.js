@@ -43,7 +43,16 @@ function orz(bot,msg){
     const orzToName = orzToFirstName + orzToLastName;
     const orzToId = msg.reply_to_message.from.id;
 
-    var replyMsg = `<a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a> 膜了 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a>`;
+    
+    if (orzFromId === orzToId) {
+      var replyMsg = `<a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a> 膜了 自己`;
+    }
+    else if(config.lemonId === orzToId || config.lemonBotId === orzToId) {
+      var replyMsg = `柠檬太菜了，应该它来膜您！\n<a href = 'tg://user?id=${config.lemonId}'>${config.lemonName}</a> 膜了 <a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a>`;
+    }
+    else {
+      var replyMsg = `<a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a> 膜了 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a>`;
+    }
   }
   else {
     var replyMsg = `<a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a> 膜了 空气`;
@@ -54,9 +63,9 @@ function orz(bot,msg){
   };
   bot.deleteMessage(chatId, msgId);
   bot.sendMessage(chatId, replyMsg, form);
-
 }
 
+//exports
 module.exports = {
   dealWithCommand,
 }
