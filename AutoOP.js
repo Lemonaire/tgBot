@@ -63,6 +63,15 @@ function verify(bot, newMembers){
         return;
     }
 
+    //禁止其他 bot 进群
+    if (newMembers.new_chat_member.is_bot === true) {
+        banBotText = `为了防止调皮的群友错误地膜菜鸡柠檬，所以本群不允许其他 bot 进群~`;
+        bot.restrictChatMember(chatId, newMembers.new_chat_member.id);
+        bot.kickChatMember(chatId, newMembers.new_chat_member.id);
+        bot.sendMessage(chatId, banBotText);
+        return;
+    }
+
     // 获取验证问题的题面和答案，并赋值给 codon 和 answer
     var question = functions.getQuestion();
     var codon = question.codon;
@@ -100,12 +109,20 @@ function verify(bot, newMembers){
                 const orzToName = orzToFirstName + orzToLastName;
                 const orzToId = newMembers.new_chat_member.id;
 
-                // 发送验证成功的通知
-                var welcomeMsgText = `验证成功，欢迎新大佬 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a>`;
-                var welcomeForm = {
-                    'parse_mode': 'HTML',   // 设置消息的解析模式
-                }
-                bot.sendMessage(chatId, welcomeMsgText, welcomeForm);
+                // 发送验证成功的通知（包含入群又退群等意外情况）
+                bot.getChatMember(chatId, orzToId).then(msg => {
+                    if(`member` === msg.status) {
+                        var welcomeMsgText = `验证成功，欢迎新大佬 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a>`;
+                    }
+                    else {
+                        var welcomeMsgText = `虽然验证成功了，但不知道为什么，大佬 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a> 的状态不太对`;
+                    }
+                    var welcomeForm = {
+                        'parse_mode': 'HTML',   // 设置消息的解析模式
+                    }
+                    bot.sendMessage(chatId, welcomeMsgText, welcomeForm);
+                })
+
             }
             else {
                 failToVerify(bot, newMembers);    // 验证失败
