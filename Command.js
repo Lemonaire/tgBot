@@ -1,7 +1,7 @@
 /**
  * @fileOverview 对 bot 收到的指令进行处理
  * @author Lemonaire
- * @version 1.1
+ * @version 1.2
  * @requires Functions
  * @requires config
  */
@@ -19,7 +19,10 @@ const testDiscussChatId = config.testDiscussChatId;
  */
 function dealWithCommand(bot) {
     bot.onText(/^(\/orz|\/orz@Lemonaires_bot)$/, (msg, match) => {
-        orz(bot,msg);
+        orz(bot, msg);
+    });
+    bot.onText(/^(\/ping|\/ping@Lemonaires_bot)$/, (msg, match) => {
+        ping(bot, msg);
     });
 }
 
@@ -39,7 +42,7 @@ function dealWithCommand(bot) {
  * @param {Object} bot
  * @param {Object} msg - Message 格式，收到的 /orz 指令消息
  */
-function orz(bot,msg){
+function orz(bot, msg) {
     /**
     * @todo 把所有的 Chat ID 重构成 dict，可能还要封装一下
     */
@@ -87,6 +90,27 @@ function orz(bot,msg){
     };
     bot.deleteMessage(chatId, msgId);
     bot.sendMessage(chatId, replyMsg, form);
+}
+
+/**
+ * @function ping
+ * @description 存活测试
+ * @param {Object} bot
+ * @param {Object} msg - Message 格式，收到的 /ping 指令消息
+ */
+function ping(bot, msg) {
+    /**
+    * @todo 把所有的 Chat ID 重构成 dict，可能还要封装一下
+    */
+    // 判断 bot 所在群是否是已经授权的群
+    var chatId = msg.chat.id;
+    if (chatId !== lemonsterDiscussChatId && chatId !== testDiscussChatId) {
+        return;
+    }
+
+    //存活测试的回复
+    msgText = `ping pong boom ping pong ping ping boom ping ping boom ping ping ping pong boom ping`;
+    bot.sendMessage(chatId, msgText);
 }
 
 /**

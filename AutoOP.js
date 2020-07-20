@@ -1,7 +1,7 @@
 /**
  * @fileOverview 触发式的自动操作 Automatic Operations
  * @author Lemonaire 
- * @version 1.1
+ * @version 1.2
  * @requires config
  * @requires Functions
  */
@@ -13,21 +13,27 @@ const lemonsterDiscussChatId = config.lemonsterDiscussChatId;
 const testDiscussChatId = config.testDiscussChatId;
 const lemonsterChannelId = config.lemonsterChannelId;
 const testChannelId = config.testChannelId;
+var canOrzLemon = true;
 
 /**
  * @function executeAutoOP
  * @description 暴露给外部的 index.js 来执行所有的自动操作
  * @param {Object} bot
  */
-function executeAutoOP(bot){
+function executeAutoOP(bot) {
     // 自动转发指定 Channel 的最新 Post
     bot.on('channel_post', (chPost)=> {
         fwChPost(bot, chPost);
     });
 
     // 自动对新入群用户进行验证
-    bot.on('new_chat_members', (newMembers)=>{
+    bot.on('new_chat_members', (newMembers)=> {
         verify(bot, newMembers);
+    });
+
+    //控制出现 「膜了 Lemon」的频率
+    bot.onText(/(膜[\s]*了[\s]*L[\s]*e[\s]*m[\s]*o[\s]*n)/im, (msg, match) => {
+        limitOrzLemon(bot, msg);
     });
 }
 
@@ -35,7 +41,7 @@ function executeAutoOP(bot){
  * @function fwChPost
  * @description 转发指定 Channel 的最新 Post
  * @param {Object} bot
- * @param {Object} chPOst - Message 格式，收到的 Channel Post 消息
+ * @param {Object} chPost - Message 格式，收到的 Channel Post 消息
  */
 function fwChPost(bot, chPost) {
     var chatId = functions.getDiscussId(chPost);    // 判断 Channel 是否已经授权，如果授权，返回对应的 Discuss ID
@@ -53,7 +59,7 @@ function fwChPost(bot, chPost) {
  * @param {Object} bot
  * @param {Object} newMembers - Message 格式，用户加群时生成的通知消息
  */
-function verify(bot, newMembers){
+function verify(bot, newMembers) {
     /**
     * @todo 把所有的 Chat ID 重构成 dict，可能还要封装一下
     */
@@ -63,9 +69,12 @@ function verify(bot, newMembers){
         return;
     }
 
+    /**
+    * @todo 设置 bot 白名单，通过申请的 bot 可以加群
+    */
     //禁止其他 bot 进群
-    if (newMembers.new_chat_member.is_bot === true) {
-        banBotText = `为了防止调皮的群友错误地膜菜鸡柠檬，所以本群不允许其他 bot 进群~`;
+    if (newMembers.new_chat_member.is_bot === true && newMembers.new_chat_member.id !== config.testBotId && newMembers.new_chat_member.id !== config.lemonBotId) {
+        banBotText = `为了防止调皮的群友做出奇奇怪怪的事情，所以本群不允许陌生的 bot 进群~（菜鸡柠檬正在努力加上白名单功能）`;
         bot.restrictChatMember(chatId, newMembers.new_chat_member.id);
         bot.kickChatMember(chatId, newMembers.new_chat_member.id);
         bot.sendMessage(chatId, banBotText);
@@ -137,12 +146,55 @@ function verify(bot, newMembers){
  * @param {Object} bot
  * @param {Object} newMembers - Message 格式，用户加群时生成的通知消息
  */
-function failToVerify(bot, newMembers){
+function failToVerify(bot, newMembers) {
     var chatId = newMembers.chat.id;
     var userId = newMembers.new_chat_members[0].id;
     var msg = '验证失败，请联系管理员解封。'
     bot.restrictChatMember(chatId, userId);
     bot.sendMessage(chatId, msg);
+}
+
+/**
+ * @function limitOrzLemon
+ * @description 限制膜柠檬的频率
+ * @param {Object} bot
+ * @param {Object} newMembers - Message 格式，柠檬被膜的消息
+ */
+function limitOrzLemon(bot, msg) {
+    /**
+    * @todo 把所有的 Chat ID 重构成 dict，可能还要封装一下
+    */
+    // 判断 bot 所在群是否是已经授权的群
+    const chatId = msg.chat.id;
+    if (chatId !== lemonsterDiscussChatId && chatId !== testDiscussChatId) {
+        return;
+    }
+
+    const msgId = msg.message_id;
+    //让我看看是哪个调皮的群友又在膜柠檬了
+    const orzFromFirstName = functions.isset(msg.from.first_name) ? functions.htmlEncode(msg.from.first_name) : '';
+    const orzFromLastName = functions.isset(msg.from.last_name) ? ' ' + functions.htmlEncode(msg.from.last_name) : '';
+    const orzFromName = orzFromFirstName + orzFromLastName;
+    const orzFromId = msg.from.id;
+
+    //设置定时器，判断距离上一次柠檬被膜有没有超过 24h
+    if (canOrzLemon) {
+        canOrzLemon = false;
+        const timeoutObj = setTimeout(() => {
+            canOrzLemon = true;
+        }, 1000 * 60 * 60 * 24);
+
+        var replyMsg = `哇！菜鸡柠檬被膜了！谢谢大佬 <a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a>`;
+    }
+    else {
+        var replyMsg = `大家一天只能膜一次菜鸡柠檬啦！不然它会膨胀的 qwq`;
+        bot.deleteMessage(chatId, msgId);
+    }
+
+    const form = {
+        'parse_mode': 'HTML',   // 设置消息的解析模式
+    };
+    bot.sendMessage(chatId, replyMsg, form);
 }
 
 /**
