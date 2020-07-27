@@ -7,10 +7,7 @@
  */
 const functions = require('./Functions.js');
 const config = require('./config.js');
-
-// 配置授权的 Discuss ID
-const lemonsterDiscussChatId = config.lemonsterDiscussChatId;
-const testDiscussChatId = config.testDiscussChatId;
+const { isVerifiedChat } = require('./Functions.js');
 
 /**
  * @function dealWithCommand
@@ -48,7 +45,7 @@ function orz(bot, msg) {
     */
     // 判断 bot 所在群是否是已经授权的群
     var chatId = msg.chat.id;
-    if (chatId !== lemonsterDiscussChatId && chatId !== testDiscussChatId) {
+    if (!isVerifiedChat(chatId)) {
         return;
     }
 
@@ -104,7 +101,7 @@ function ping(bot, msg) {
     */
     // 判断 bot 所在群是否是已经授权的群
     var chatId = msg.chat.id;
-    if (chatId !== lemonsterDiscussChatId && chatId !== testDiscussChatId) {
+    if (!isVerifiedChat(chatId)) {
         return;
     }
 

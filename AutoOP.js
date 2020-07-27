@@ -9,8 +9,6 @@ const config = require('./config.js');
 const functions = require('./Functions.js');
 
 // 配置授权的 Channel ID 和 Discuss ID
-const lemonsterDiscussChatId = config.lemonsterDiscussChatId;
-const testDiscussChatId = config.testDiscussChatId;
 const lemonsterChannelId = config.lemonsterChannelId;
 const testChannelId = config.testChannelId;
 var canOrzLemon = true;
@@ -65,7 +63,7 @@ function verify(bot, newMembers) {
     */
     // 判断 bot 所在群是否是已经授权的群
     var chatId = newMembers.chat.id;
-    if (chatId !== lemonsterDiscussChatId && chatId !== testDiscussChatId) {
+    if (!isVerifiedChat(chatId)) {
         return;
     }
 
@@ -166,7 +164,7 @@ function limitOrzLemon(bot, msg) {
     */
     // 判断 bot 所在群是否是已经授权的群
     const chatId = msg.chat.id;
-    if (chatId !== lemonsterDiscussChatId && chatId !== testDiscussChatId) {
+    if (!isVerifiedChat(chatId)) {
         return;
     }
 

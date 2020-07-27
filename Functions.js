@@ -13,6 +13,7 @@ const lemonsterDiscussChatId = config.lemonsterDiscussChatId;
 const testDiscussChatId = config.testDiscussChatId;
 const lemonsterChannelId = config.lemonsterChannelId;
 const testChannelId = config.testChannelId;
+const verifiedChatIdList = [lemonsterDiscussChatId, testDiscussChatId];
 
 /**
  * @function getQuestion
@@ -20,7 +21,8 @@ const testChannelId = config.testChannelId;
  * @return {String} json 格式，包含题面和答案
  */
 function getQuestion(){
-    var qNum = Math.floor(Math.random() * 61);
+    var totalQuestionCount = questions.bioQuestions.length;
+    var qNum = Math.floor(Math.random() * totalQuestionCount);
     return questions.bioQuestions[qNum];
 }
 
@@ -99,6 +101,11 @@ function htmlDecode(str) {
     return s;
 }
 
+function isVerifiedChat(chatId)
+{
+    return chatId in verifiedChatIdList;
+}
+
 /**
  * @description 一些底层方法？大概吧
  * @module Functions
@@ -109,4 +116,5 @@ module.exports = {
     isset,
     htmlEncode,
     htmlDecode,
+    isVerifiedChat,
 }
