@@ -45,7 +45,7 @@ function orz(bot, msg) {
     */
     // 判断 bot 所在群是否是已经授权的群
     var chatId = msg.chat.id;
-    if (!isVerifiedChat(chatId)) {
+    if (!functions.isVerifiedChat(chatId)) {
         return;
     }
 
@@ -101,10 +101,10 @@ function ping(bot, msg) {
     */
     // 判断 bot 所在群是否是已经授权的群
     var chatId = msg.chat.id;
-    if (!isVerifiedChat(chatId)) {
+    if (!functions.isVerifiedChat(chatId)) {
         return;
     }
-
+    var 
     //存活测试的回复
     msgText = `ping pong boom ping pong ping ping boom ping ping boom ping ping ping pong boom ping`;
     bot.sendMessage(chatId, msgText);

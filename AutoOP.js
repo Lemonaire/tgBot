@@ -63,7 +63,7 @@ function verify(bot, newMembers) {
     */
     // 判断 bot 所在群是否是已经授权的群
     var chatId = newMembers.chat.id;
-    if (!isVerifiedChat(chatId)) {
+    if (!functions.isVerifiedChat(chatId)) {
         return;
     }
 
@@ -164,7 +164,7 @@ function limitOrzLemon(bot, msg) {
     */
     // 判断 bot 所在群是否是已经授权的群
     const chatId = msg.chat.id;
-    if (!isVerifiedChat(chatId)) {
+    if (!functions.isVerifiedChat(chatId)) {
         return;
     }
 
