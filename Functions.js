@@ -101,6 +101,12 @@ function htmlDecode(str) {
     return s;
 }
 
+/**
+ * @function isVerifiedChat
+ * @description 判断一个 chat 是否是授权的 chat
+ * @param {Num} chatId - 需要判断的 chat id
+ * @returns {Boolean} - 是否是授权 chat
+ */
 function isVerifiedChat(chatId)
 {
     return chatId in verifiedChatIdList;

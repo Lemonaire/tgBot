@@ -104,7 +104,7 @@ function ping(bot, msg) {
     if (!functions.isVerifiedChat(chatId)) {
         return;
     }
-    
+
     //存活测试的回复
     msgText = `ping pong boom ping pong ping ping boom ping ping boom ping ping ping pong boom ping`;
     bot.sendMessage(chatId, msgText);
