@@ -27,7 +27,7 @@ function dealWithCommand(bot) {
         ping(bot, msg);
     });
     // /reportOrzLemonText
-    bot.onText(/^(\/reportOrzLemonText|\/reportOrzLemonText@Lemonaires_bot)$/, (msg,match) => {
+    bot.onText(/^(\/report_orz_lemon_text|\/report_orz_lemon_text@Lemonaires_bot)$/, (msg,match) => {
         reportOrzLemonText(bot, msg);
     });
 }
