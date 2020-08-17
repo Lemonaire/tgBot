@@ -5,6 +5,8 @@
  * @requires config
  * @requires Functions
  * @todo 新成员进群时，自动加入数据库
+ * @todo 同步频道内容的修改
+ * @todo 把频道发的多张图片合并转发
  */
 const config = require('./config.js');
 const functions = require('./Functions.js');

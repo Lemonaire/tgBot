@@ -125,11 +125,11 @@ function reportOrzLemonText(bot, msg) {
 
     // 这个指令只能柠檬自己用，所以要判断是不是柠檬本萌（逃）。如果不是，则禁言两分钟
     if(msg.from.id != config.lemonId) {
-        bot.restrictChatMember(chatId, msg.from.id, {'until_date': Date.now() + 120000});
-        bot.sendMessage(chatId, "reportOrzLemonText 这条指令只能柠檬用哦~乱用的小可爱会被禁言两分钟嘻嘻~");
+        // until_date 的参数是 unix time，精确到 s，Date.now() 返回的时间戳精确到毫秒，所以要 / 1000，计算得到的是浮点数，要取整
+        bot.restrictChatMember(chatId, msg.from.id, {'until_date': Math.floor((Date.now() + 120000) / 1000)});
+        bot.sendMessage(chatId, "report_orz_lemon_text 这条指令只能柠檬用哦~乱用的小可爱会被禁言两分钟嘻嘻~");
         return;
     }
-
 
     // 向数据库加入消息文本
     var sql = 'insert into orz_lemon_text(text) values(?)';
