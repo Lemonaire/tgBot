@@ -19,7 +19,7 @@ Defined some bot commands.
 2. ping command. Make sure that the bot is working.  
 3. report_orz_lemon_text command. When the group members try to orz lemon, lemon could use this command to report the text. Then the text will be inserted into the database, so that it will be detected automatically next time.  
 
-### config.js
+### config.js  
 Defined the configuration.  
 It includes:  
 >mysql - an instance of `mysql` package  
@@ -44,5 +44,27 @@ Defined some frequently-used or useful functions.
 7. htmlEncode. To transfer meaning of some html characters so that the injection could be avoided, especially in the command `orz`.  
 8. htmlDecode. This function is never used, just to make pairs of the function `htmlEncode`.  
 
-### index.js
+### index.js  
 Create an instance of telegram bot and run it.  
+
+### coding standards  
+1. Each function should have comments in the following format. Note that all the asterisks should align and there should be a space between the asterisk and the comments.  
+
+		/**  
+		 * @function function name  
+		 * @description description to this function  
+		 * @param {type} the name of the parameter - the description of the parameter  
+		 * @returns {type} the name of the returned value - the description of the returned value  
+		 */  
+
+2. Eech file should have comments at the beginning of it in the following format.  
+
+		/**  
+		 * @fileOverview description of this file  
+		 * @author author's name  
+		 * @version 1.0, 1.1, 2.0, etc.  
+		 * @requires the name of the packages or file which is required  
+		 */  
+
+3. Use `@todo` to mark the unfinished work.  
+4. Other necessary comments, which explains what the following codes is doing or why you code it in this way. Note that there should be a space between `//` and the comments.  
