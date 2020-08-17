@@ -1,18 +1,15 @@
 /**
  * @fileOverview 触发式的自动操作 Automatic Operations
  * @author Lemonaire 
- * @version 1.2
+ * @version 2.0
  * @requires config
  * @requires Functions
+ * @todo 新成员进群时，自动加入数据库
  */
 const config = require('./config.js');
 const functions = require('./Functions.js');
 
-// 配置授权的 Channel ID 和 Discuss ID
-const lemonsterDiscussChatId = config.lemonsterDiscussChatId;
-const testDiscussChatId = config.testDiscussChatId;
-const lemonsterChannelId = config.lemonsterChannelId;
-const testChannelId = config.testChannelId;
+// 现在可以膜柠檬了吗！
 var canOrzLemon = true;
 
 /**
@@ -31,8 +28,8 @@ function executeAutoOP(bot) {
         verify(bot, newMembers);
     });
 
-    //控制出现 「膜了 Lemon」的频率
-    bot.onText(/(膜[\s]*了[\s]*L[\s]*e[\s]*m[\s]*o[\s]*n)/im, (msg, match) => {
+    // 控制出现「膜了 Lemon」的频率
+    bot.on('text', (msg) => {
         limitOrzLemon(bot, msg);
     });
 }
@@ -43,13 +40,10 @@ function executeAutoOP(bot) {
  * @param {Object} bot
  * @param {Object} chPost - Message 格式，收到的 Channel Post 消息
  */
-function fwChPost(bot, chPost) {
-    var chatId = functions.getDiscussId(chPost);    // 判断 Channel 是否已经授权，如果授权，返回对应的 Discuss ID
+async function fwChPost(bot, chPost) {
+    var chatId = await functions.getDiscussId(chPost);    // 判断 Channel 是否已经授权，如果授权，返回对应的 Discuss ID
     if (functions.isset(chatId)) {
         bot.forwardMessage(chatId, chPost.chat.id, chPost.message_id);
-    }
-    else {
-        return;
     }
 }
 
@@ -59,13 +53,10 @@ function fwChPost(bot, chPost) {
  * @param {Object} bot
  * @param {Object} newMembers - Message 格式，用户加群时生成的通知消息
  */
-function verify(bot, newMembers) {
-    /**
-    * @todo 把所有的 Chat ID 重构成 dict，可能还要封装一下
-    */
+async function verify(bot, newMembers) {
     // 判断 bot 所在群是否是已经授权的群
     var chatId = newMembers.chat.id;
-    if (chatId !== lemonsterDiscussChatId && chatId !== testDiscussChatId) {
+    if (! await functions.isAllowedId(chatId)) {
         return;
     }
 
@@ -82,7 +73,7 @@ function verify(bot, newMembers) {
     }
 
     // 获取验证问题的题面和答案，并赋值给 codon 和 answer
-    var question = functions.getQuestion();
+    var question = await functions.getQuestion();
     var codon = question.codon;
     var answer = question.name;
 
@@ -92,51 +83,49 @@ function verify(bot, newMembers) {
         'reply_to_message_id': newMembers.message_id,   // 设置发送消息的模式是回复，回复的消息为入群通知
     };
     // 由于 sendMessage 返回的是一个 Promise 对象，所以需要用 .then() 来获取真正的返回值
-    bot.sendMessage(chatId, verifyMsgText, verifyForm).then(verifyMsg => {
-        // 设置定时器，90秒 后验证超时，自动调用验证失败的函数
-        const timeoutObj = setTimeout(() => {
-            failToVerify(bot, newMembers);
-            bot.deleteMessage(chatId, verifyMsg.message_id);
-        }, 90000);
+    var verifyMsg = await bot.sendMessage(chatId, verifyMsgText, verifyForm);
+    // 设置定时器，90秒 后验证超时，自动调用验证失败的函数
+    const timeoutObj = setTimeout(() => {
+        failToVerify(bot, newMembers);
+        bot.deleteMessage(chatId, verifyMsg.message_id);
+    }, 90000);
 
-        // 验证通知被回复时的事件处理器
-        bot.onReplyToMessage(chatId, verifyMsg.message_id, (msg)=>{
-            // 判断回复是否来自需要验证的新用户
-            if (newMembers.from.id !== msg.from.id) {
-                return;
-            }
+    // 验证通知被回复时的事件处理器
+    await bot.onReplyToMessage(chatId, verifyMsg.message_id, async (msg)=>{
+        // 判断回复是否来自需要验证的新用户
+        if (newMembers.from.id !== msg.from.id) {
+            return;
+        }
 
-            clearTimeout(timeoutObj);   // 取消定时器
-            bot.deleteMessage(chatId, verifyMsg.message_id);    // 删除验证通知的消息
+        clearTimeout(timeoutObj);   // 取消定时器
+        bot.deleteMessage(chatId, verifyMsg.message_id);    // 删除验证通知的消息
 
-            // 判断回答是否正确
-            if (answer === msg.text) {
+        // 判断回答是否正确
+        if (answer === msg.text) {
 
-                // 获取新用户的基本信息
-                const orzToFirstName = functions.isset(newMembers.new_chat_member.first_name) ? functions.htmlEncode(newMembers.new_chat_member.first_name) : '';
-                const orzToLastName = functions.isset(newMembers.new_chat_member.last_name) ? ' ' + functions.htmlEncode(newMembers.new_chat_member.last_name) : '';
-                const orzToName = orzToFirstName + orzToLastName;
-                const orzToId = newMembers.new_chat_member.id;
+            // 获取新用户的基本信息
+            const orzToFirstName = functions.isset(newMembers.new_chat_member.first_name) ? functions.htmlEncode(newMembers.new_chat_member.first_name) : '';
+            const orzToLastName = functions.isset(newMembers.new_chat_member.last_name) ? ' ' + functions.htmlEncode(newMembers.new_chat_member.last_name) : '';
+            const orzToName = orzToFirstName + orzToLastName;
+            const orzToId = newMembers.new_chat_member.id;
 
-                // 发送验证成功的通知（包含入群又退群等意外情况）
-                bot.getChatMember(chatId, orzToId).then(msg => {
-                    if(`member` === msg.status) {
-                        var welcomeMsgText = `验证成功，欢迎新大佬 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a>`;
-                    }
-                    else {
-                        var welcomeMsgText = `虽然验证成功了，但不知道为什么，大佬 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a> 的状态不太对`;
-                    }
-                    var welcomeForm = {
-                        'parse_mode': 'HTML',   // 设置消息的解析模式
-                    }
-                    bot.sendMessage(chatId, welcomeMsgText, welcomeForm);
-                })
-
+            // 发送验证成功的通知（包含入群又退群等意外情况）
+            var replyMsg = await bot.getChatMember(chatId, orzToId);
+            var welcomeMsgText;
+            if(`member` === replyMsg.status) {
+                welcomeMsgText = `验证成功，欢迎新大佬 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a>`;
             }
             else {
-                failToVerify(bot, newMembers);    // 验证失败
+                welcomeMsgText = `虽然验证成功了，但不知道为什么，大佬 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a> 的状态不太对`;
             }
-        });
+            var welcomeForm = {
+                'parse_mode': 'HTML',   // 设置消息的解析模式
+            }
+            bot.sendMessage(chatId, welcomeMsgText, welcomeForm);
+        }
+        else {
+            failToVerify(bot, newMembers);    // 验证失败
+        }
     });
 }
 
@@ -158,15 +147,16 @@ function failToVerify(bot, newMembers) {
  * @function limitOrzLemon
  * @description 限制膜柠檬的频率
  * @param {Object} bot
- * @param {Object} newMembers - Message 格式，柠檬被膜的消息
+ * @param {Object} msg - Message 格式，柠檬被膜的消息
  */
-function limitOrzLemon(bot, msg) {
-    /**
-    * @todo 把所有的 Chat ID 重构成 dict，可能还要封装一下
-    */
+async function limitOrzLemon(bot, msg) {
     // 判断 bot 所在群是否是已经授权的群
     const chatId = msg.chat.id;
-    if (chatId !== lemonsterDiscussChatId && chatId !== testDiscussChatId) {
+    if (! await functions.isAllowedId(chatId)) {
+        return;
+    }
+
+    if (! await functions.isOrzLemonText(functions.filter(msg.text))) {
         return;
     }
 
@@ -178,16 +168,17 @@ function limitOrzLemon(bot, msg) {
     const orzFromId = msg.from.id;
 
     //设置定时器，判断距离上一次柠檬被膜有没有超过 24h
+    var replyMsg;
     if (canOrzLemon) {
         canOrzLemon = false;
         const timeoutObj = setTimeout(() => {
             canOrzLemon = true;
         }, 1000 * 60 * 60 * 24);
 
-        var replyMsg = `哇！菜鸡柠檬被膜了！谢谢大佬 <a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a>`;
+        replyMsg = `哇！菜鸡柠檬被膜了！谢谢大佬 <a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a>`;
     }
     else {
-        var replyMsg = `大家一天只能膜一次菜鸡柠檬啦！不然它会膨胀的 qwq`;
+        replyMsg = `大家一天只能膜一次菜鸡柠檬啦！不然它会膨胀的 qwq`;
         bot.deleteMessage(chatId, msgId);
     }
 
@@ -210,3 +201,4 @@ module.exports = {
 // bot.getChat('@username').then(function(chat) {
 //   console.log(chat.id);
 // })
+
