@@ -107,7 +107,6 @@ function connectMySql(){
     return connection;
 }
 
-
 /**
  * @function isset
  * @description 判断变量是否被设置

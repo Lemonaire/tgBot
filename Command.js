@@ -10,8 +10,7 @@
  */
 const functions = require('./Functions.js');
 const config = require('./config.js');
-const autoOP =require('./AutoOP');
-
+const form = config.form;
 /**
  * @function dealWithCommand
  * @description 暴露给外部的 index.js 来处理所有的 bot 指令
@@ -88,9 +87,6 @@ async function orz(bot, msg) {
         replyMsg = `<a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a> 膜了 全体群友`;
     }
 
-    const form = {
-        'parse_mode': 'HTML',   // 设置消息的解析模式
-    };
     bot.deleteMessage(chatId, msgId);
     bot.sendMessage(chatId, replyMsg, form);
 }
@@ -111,7 +107,7 @@ async function ping(bot, msg) {
     bot.deleteMessage(chatId, msg.message_id);
     //存活测试的回复
     msgText = `ping pong boom ping pong ping ping boom ping ping boom ping ping ping pong boom ping`;
-    bot.sendMessage(chatId, msgText);
+    bot.sendMessage(chatId, msgText, form);
 }
 
 /**
@@ -127,19 +123,25 @@ function reportOrzLemonText(bot, msg) {
     if(msg.from.id != config.lemonId) {
         // until_date 的参数是 unix time，精确到 s，Date.now() 返回的时间戳精确到毫秒，所以要 / 1000，计算得到的是浮点数，要取整
         bot.restrictChatMember(chatId, msg.from.id, {'until_date': Math.floor((Date.now() + 120000) / 1000)});
-        bot.sendMessage(chatId, "report_orz_lemon_text 这条指令只能柠檬用哦~乱用的小可爱会被禁言两分钟嘻嘻~");
+        bot.sendMessage(chatId, "report_orz_lemon_text 这条指令只能柠檬用哦~乱用的小可爱会被禁言两分钟嘻嘻~", form);
         return;
     }
 
-    // 向数据库加入消息文本
-    var sql = 'insert into orz_lemon_text(text) values(?)';
-    var parameter = [functions.filter(msg.reply_to_message.text)];
-    var connection = functions.connectMySql();
-    connection.query(sql, parameter, function(err, result, callback) {
-        connection.end();
-    });
+    if(functions.isset(msg.reply_to_message)) {
+        // 向数据库加入消息文本
+        var sql = 'insert into orz_lemon_text(text) values(?)';
+        var parameter = [functions.filter(msg.reply_to_message.text)];
+        var connection = functions.connectMySql();
+        connection.query(sql, parameter, function(err, result, callback) {
+            connection.end();
+        });
 
-    bot.sendMessage(chatId, "done!");
+        bot.sendMessage(chatId, "done!", form);
+    }
+    else {
+        bot.sendMessage(chatId, "需要回复一条消息来 report", form);
+    }
+
     bot.deleteMessage(chatId, msg.message_id);
 }
 

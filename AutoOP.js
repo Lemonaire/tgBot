@@ -10,6 +10,7 @@
  */
 const config = require('./config.js');
 const functions = require('./Functions.js');
+const form = config.form;
 
 // 现在可以膜柠檬了吗！
 var canOrzLemon = true;
@@ -70,7 +71,7 @@ async function verify(bot, newMembers) {
         banBotText = `为了防止调皮的群友做出奇奇怪怪的事情，所以本群不允许陌生的 bot 进群~（菜鸡柠檬正在努力加上白名单功能）`;
         bot.restrictChatMember(chatId, newMembers.new_chat_member.id);
         bot.kickChatMember(chatId, newMembers.new_chat_member.id);
-        bot.sendMessage(chatId, banBotText);
+        bot.sendMessage(chatId, banBotText, form);
         return;
     }
 
@@ -83,6 +84,7 @@ async function verify(bot, newMembers) {
     var verifyMsgText = `请在 90秒 内回复本条消息，内容为密码子 '${codon}' 所对应的氨基酸的中文名，回答正确则验证成功。`;
     var verifyForm = {
         'reply_to_message_id': newMembers.message_id,   // 设置发送消息的模式是回复，回复的消息为入群通知
+        'disable_notification': true,
     };
     // 由于 sendMessage 返回的是一个 Promise 对象，所以需要用 .then() 来获取真正的返回值
     var verifyMsg = await bot.sendMessage(chatId, verifyMsgText, verifyForm);
@@ -120,10 +122,7 @@ async function verify(bot, newMembers) {
             else {
                 welcomeMsgText = `虽然验证成功了，但不知道为什么，大佬 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a> 的状态不太对`;
             }
-            var welcomeForm = {
-                'parse_mode': 'HTML',   // 设置消息的解析模式
-            }
-            bot.sendMessage(chatId, welcomeMsgText, welcomeForm);
+            bot.sendMessage(chatId, welcomeMsgText, form);
         }
         else {
             failToVerify(bot, newMembers);    // 验证失败
@@ -142,7 +141,7 @@ function failToVerify(bot, newMembers) {
     var userId = newMembers.new_chat_members[0].id;
     var msg = '验证失败，请联系管理员解封。'
     bot.restrictChatMember(chatId, userId);
-    bot.sendMessage(chatId, msg);
+    bot.sendMessage(chatId, msg, form);
 }
 
 /**
@@ -184,9 +183,6 @@ async function limitOrzLemon(bot, msg) {
         bot.deleteMessage(chatId, msgId);
     }
 
-    const form = {
-        'parse_mode': 'HTML',   // 设置消息的解析模式
-    };
     bot.sendMessage(chatId, replyMsg, form);
 }
 
