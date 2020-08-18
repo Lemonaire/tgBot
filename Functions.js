@@ -1,7 +1,7 @@
 /**
  * @fileOverview 定义一些底层方法
  * @author Lemonaire
- * @version 2.0
+ * @version 2.2
  * @requires config
  */
 const config = require('./config.js');
@@ -81,11 +81,14 @@ function isAllowedId(chatId) {
 function isOrzLemonText(text) {
     var sql = 'select text from orz_lemon_text';
     var connection = connectMySql();
+
+    // 如果传入的参数为空，则发出警报
     if(!isset(text)) {
         return new Promise((resolve,reject)=>{
             resolve("alert");
         });
     }
+
     // 由于 nodejs 的异步处理操作，只能通过 Promise 对象把 sql 结果集或经过处理以后的结果返回出去
     return new Promise((resolve,reject)=>{
         connection.query(sql, function(err, result) {
@@ -132,7 +135,7 @@ function isset(a){
  * @returns {String} str - 过滤处理后的字符串
  */
 function filter(str) {
-    str = str.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,"");    // 只保留中文和字母
+    str = str.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,"");    // 只保留大小写字母、数字和非扩展的中文字符
     str = str.toLowerCase();    // 转小写
     return str;
 }
@@ -152,8 +155,8 @@ function htmlEncode(str) {
     s = s.replace(/</g, "&lt;");
     s = s.replace(/>/g, "&gt;");
     // s = s.replace(/ /g, "&nbsp;");
-    s = s.replace(/\'/g, "&#39;");  // IE下不支持实体名称
-    s = s.replace(/\"/g, "&quot;");
+    s = s.replace(/'/g, "&#39;");  // IE下不支持实体名称
+    s = s.replace(/"/g, "&quot;");
     return s;
 }
 

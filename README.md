@@ -18,6 +18,7 @@ Defined some bot commands.
 1. orz command.  Everyone except lemon could be orzed by using this command.  
 2. ping command. Make sure that the bot is working.  
 3. report_orz_lemon_text command. When the group members try to orz lemon, lemon could use this command to report the text. Then the text will be inserted into the database, so that it will be detected automatically next time.  
+4. mute. Lemon can use this command to mute one of the chat members for five minutes.  
 
 ### config.js  
 Defined the configuration.  
@@ -32,6 +33,7 @@ It includes:
 >lemonLastName  
 >lemonName  
 >mysqlConfig - the configuration used to connect to mysql  
+>form - the universal query options when calling the function `sendMessage`  
 
 ### Functions.js  
 Defined some frequently-used or useful functions.  
@@ -40,7 +42,7 @@ Defined some frequently-used or useful functions.
 3. isAllowedId. To judge whether the chat id is allowed or not, so that others couldn't use this bot without permission.  
 4. isOrzLemonText. To judge whether someone is trying to orz lemon, used in the command `report_orz_lemon_text`.  
 5. isset. To judge whether a parameter has been set.  
-6. filter. To filter the punctuation, usually used in the codes which involve sql statement.  
+6. filter. To filter all characters except letters, digits and Chinese characters.  
 7. htmlEncode. To transfer meaning of some html characters so that the injection could be avoided, especially in the command `orz`.  
 8. htmlDecode. This function is never used, just to make pairs of the function `htmlEncode`.  
 

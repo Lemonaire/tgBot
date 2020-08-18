@@ -16,7 +16,7 @@ const command = require('./Command.js');
 const autoOP = require('./AutoOP.js');
 
 // 创建 bot 实例，使用轮询，并配置代理
-const bot = new TelegramBot(config.lemonTestBotToken, {
+const bot = new TelegramBot(config.token, {
     polling: true,
     request: {
         agentClass: Agent,

@@ -1,7 +1,7 @@
 /**
  * @fileOverview 触发式的自动操作 Automatic Operations
  * @author Lemonaire 
- * @version 2.0
+ * @version 2.2
  * @requires config
  * @requires Functions
  * @todo 新成员进群时，自动加入数据库
@@ -158,15 +158,17 @@ async function limitOrzLemon(bot, msg) {
     }
 
     // 如果是柠檬自己发的消息就跳过
-    // if(config.lemonId == msg.from.id) {
-    //     return;
-    // }
+    if(config.lemonId == msg.from.id) {
+        return;
+    }
 
     // 检测是不是在膜柠檬
     var isOrzLemonText = await functions.isOrzLemonText(functions.filter(msg.text));
+
     if (isOrzLemonText === false) {
         return;
     }
+    // alert 说明经过过滤之后的消息为空，即所有字符都不属于大小写字母、数字、中文，很可能是群友在说火星文（大雾
     else if (isOrzLemonText === "alert") {
         const alertForm = {
             'parse_mode': 'HTML',   // 设置消息的解析模式

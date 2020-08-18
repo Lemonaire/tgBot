@@ -1,7 +1,7 @@
 /**
  * @fileOverview 对 bot 收到的指令进行处理
  * @author Lemonaire
- * @version 2.0
+ * @version 2.2
  * @requires Functions
  * @requires config
  * @todo 被膜排行榜
@@ -129,9 +129,11 @@ function reportOrzLemonText(bot, msg) {
         // until_date 的参数是 unix time，精确到 s，Date.now() 返回的时间戳精确到毫秒，所以要 / 1000，计算得到的是浮点数，要取整
         bot.restrictChatMember(chatId, msg.from.id, {'until_date': Math.floor((Date.now() + 120000) / 1000)});
         bot.sendMessage(chatId, "report_orz_lemon_text 这条指令只能柠檬用哦~乱用的小可爱会被禁言两分钟嘻嘻~", form);
+        bot.deleteMessage(chatId, msg.message_id);
         return;
     }
 
+    // 判断是否回复了消息，如无回复则发送错误提示
     if(functions.isset(msg.reply_to_message)) {
         // 向数据库加入消息文本
         var sql = 'insert into orz_lemon_text(text) values(?)';
@@ -150,6 +152,12 @@ function reportOrzLemonText(bot, msg) {
     bot.deleteMessage(chatId, msg.message_id);
 }
 
+/**
+ * @function mute
+ * @description 禁言群成员 5 分钟
+ * @param {Object} bot
+ * @param {Object} msg - Message 格式，收到的 /mute 指令消息
+ */
 function mute(bot, msg) {
     var chatId = msg.chat.id;
 
@@ -158,9 +166,11 @@ function mute(bot, msg) {
         // until_date 的参数是 unix time，精确到 s，Date.now() 返回的时间戳精确到毫秒，所以要 / 1000，计算得到的是浮点数，要取整
         bot.restrictChatMember(chatId, msg.from.id, {'until_date': Math.floor((Date.now() + 60000) / 1000)});
         bot.sendMessage(chatId, "report_orz_lemon_text 这条指令只能柠檬用哦~乱用的小可爱会被禁言一分钟嘻嘻~", form);
+        bot.deleteMessage(chatId, msg.message_id);
         return;
     }
 
+    // 判断是否回复了消息，如无回复则发送错误提示
     if(functions.isset(msg.reply_to_message)) {
         var muteId = msg.reply_to_message.from.id;
         bot.restrictChatMember(chatId, muteId, {'until_date': Math.floor((Date.now() + 300000) / 1000)});
@@ -169,6 +179,7 @@ function mute(bot, msg) {
     else {
         bot.sendMessage(chatId, "需要回复一条消息来 mute", form);
     }
+    bot.deleteMessage(chatId, msg.message_id);
 }
 
 
