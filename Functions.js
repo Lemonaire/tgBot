@@ -76,11 +76,16 @@ function isAllowedId(chatId) {
  * @function isOrzLemonText
  * @description 查询数据库，判断消息内容是否是膜柠檬的文本
  * @param {String} text - 需要判断的消息内容
- * @return {Promise} - boolean 是否是膜柠檬的文本
+ * @return {Promise} - 是否是膜柠檬的文本，如果经过过滤之后得到了空字符串，则返回 "alert"
  */
 function isOrzLemonText(text) {
     var sql = 'select text from orz_lemon_text';
     var connection = connectMySql();
+    if(!isset(text)) {
+        return new Promise((resolve,reject)=>{
+            resolve("alert");
+        });
+    }
     // 由于 nodejs 的异步处理操作，只能通过 Promise 对象把 sql 结果集或经过处理以后的结果返回出去
     return new Promise((resolve,reject)=>{
         connection.query(sql, function(err, result) {
@@ -127,10 +132,7 @@ function isset(a){
  * @returns {String} str - 过滤处理后的字符串
  */
 function filter(str) {
-    // 处理英文符号
-    str = str.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,"");
-    // 处理中文符号
-    str = str.replace(/[\！|\￥|\·|\…|\（|\）|\—|\《|\》|\？|\。|\，|\；|\“|\”|\‘|\’|\：]/g,"");
+    str = str.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,"");    // 只保留中文和字母
     str = str.toLowerCase();    // 转小写
     return str;
 }

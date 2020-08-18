@@ -29,6 +29,11 @@ function dealWithCommand(bot) {
     bot.onText(/^(\/report_orz_lemon_text|\/report_orz_lemon_text@Lemonaires_bot)$/, (msg,match) => {
         reportOrzLemonText(bot, msg);
     });
+
+    // /mute
+    bot.onText(/^(\/mute|\/mute@Lemonaires_bot)$/, (msg,match) => {
+        mute(bot, msg);
+    });
 }
 
 // 可能会加上的 /echo 指令
@@ -144,6 +149,28 @@ function reportOrzLemonText(bot, msg) {
 
     bot.deleteMessage(chatId, msg.message_id);
 }
+
+function mute(bot, msg) {
+    var chatId = msg.chat.id;
+
+    // 这个指令只能柠檬自己用，所以要判断是不是柠檬本萌（逃）。如果不是，则禁言一分钟
+    if(msg.from.id != config.lemonId) {
+        // until_date 的参数是 unix time，精确到 s，Date.now() 返回的时间戳精确到毫秒，所以要 / 1000，计算得到的是浮点数，要取整
+        bot.restrictChatMember(chatId, msg.from.id, {'until_date': Math.floor((Date.now() + 60000) / 1000)});
+        bot.sendMessage(chatId, "report_orz_lemon_text 这条指令只能柠檬用哦~乱用的小可爱会被禁言一分钟嘻嘻~", form);
+        return;
+    }
+
+    if(functions.isset(msg.reply_to_message)) {
+        var muteId = msg.reply_to_message.from.id;
+        bot.restrictChatMember(chatId, muteId, {'until_date': Math.floor((Date.now() + 300000) / 1000)});
+        bot.sendMessage(chatId, "禁言 5 分钟已到账~", form);
+    }
+    else {
+        bot.sendMessage(chatId, "需要回复一条消息来 mute", form);
+    }
+}
+
 
 /**
  * @description 处理所有的 bot 指令

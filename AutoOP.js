@@ -157,7 +157,23 @@ async function limitOrzLemon(bot, msg) {
         return;
     }
 
-    if (! await functions.isOrzLemonText(functions.filter(msg.text))) {
+    // 如果是柠檬自己发的消息就跳过
+    // if(config.lemonId == msg.from.id) {
+    //     return;
+    // }
+
+    // 检测是不是在膜柠檬
+    var isOrzLemonText = await functions.isOrzLemonText(functions.filter(msg.text));
+    if (isOrzLemonText === false) {
+        return;
+    }
+    else if (isOrzLemonText === "alert") {
+        const alertForm = {
+            'parse_mode': 'HTML',   // 设置消息的解析模式
+            'disable_notification': true,
+            'reply_to_message_id': msg.message_id,
+        };
+        bot.sendMessage(chatId, "qwq 我好像不懂你在说什么", alertForm);
         return;
     }
 
