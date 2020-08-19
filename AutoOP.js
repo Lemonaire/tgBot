@@ -86,8 +86,8 @@ async function verify(bot, newMembers) {
         'reply_to_message_id': newMembers.message_id,   // 设置发送消息的模式是回复，回复的消息为入群通知
         'disable_notification': true,
     };
-    // 由于 sendMessage 返回的是一个 Promise 对象，所以需要用 .then() 来获取真正的返回值
     var verifyMsg = await bot.sendMessage(chatId, verifyMsgText, verifyForm);
+
     // 设置定时器，90秒 后验证超时，自动调用验证失败的函数
     const timeoutObj = setTimeout(() => {
         failToVerify(bot, newMembers);
@@ -106,7 +106,6 @@ async function verify(bot, newMembers) {
 
         // 判断回答是否正确
         if (answer === msg.text) {
-
             // 获取新用户的基本信息
             const orzToFirstName = functions.isset(newMembers.new_chat_member.first_name) ? functions.htmlEncode(newMembers.new_chat_member.first_name) : '';
             const orzToLastName = functions.isset(newMembers.new_chat_member.last_name) ? ' ' + functions.htmlEncode(newMembers.new_chat_member.last_name) : '';

@@ -89,6 +89,11 @@ function isOrzLemonText(text) {
         });
     }
 
+    // 处理英文符号
+    text = text.replace(/[ ~`!@#$%^&*()-_+=|\[\]{};:"',<.>\/?\\]/g,"");
+    // 处理中文符号
+    text = text.replace(/[！￥·…（）—《》？。，；“”‘’：]/g,"");
+
     // 由于 nodejs 的异步处理操作，只能通过 Promise 对象把 sql 结果集或经过处理以后的结果返回出去
     return new Promise((resolve,reject)=>{
         connection.query(sql, function(err, result) {
@@ -135,7 +140,8 @@ function isset(a){
  * @returns {String} str - 过滤处理后的字符串
  */
 function filter(str) {
-    str = str.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g,"");    // 只保留大小写字母、数字和非扩展的中文字符
+    // 只保留大小写字母、数字、中英文常用符号和非扩展的中文字符
+    str = str.replace(/[^！￥·…（）—《》？。，；“”‘’： ~`!@#$%^&*()-_+=|\[\]{};:"',<.>\/?\\a-zA-Z0-9\u4e00-\u9fa5]/g,"");
     str = str.toLowerCase();    // 转小写
     return str;
 }
