@@ -73,43 +73,6 @@ function isAllowedId(chatId) {
 }
 
 /**
- * @function isOrzLemonText
- * @description 查询数据库，判断消息内容是否是膜柠檬的文本
- * @param {String} text - 需要判断的消息内容
- * @return {Promise} - 是否是膜柠檬的文本，如果经过过滤之后得到了空字符串，则返回 "alert"
- */
-function isOrzLemonText(text) {
-    var sql = 'select text from orz_lemon_text';
-    var connection = connectMySql();
-
-    // 如果传入的参数为空，则发出警报
-    if(!isset(text)) {
-        return new Promise((resolve,reject)=>{
-            resolve("alert");
-        });
-    }
-
-    // 处理英文符号
-    text = text.replace(/[ ~`!@#$%^&*()-_+=|\[\]{};:"',<.>\/?\\]/g,"");
-    // 处理中文符号
-    text = text.replace(/[！￥·…（）—《》？。，；“”‘’：]/g,"");
-
-    // 由于 nodejs 的异步处理操作，只能通过 Promise 对象把 sql 结果集或经过处理以后的结果返回出去
-    return new Promise((resolve,reject)=>{
-        connection.query(sql, function(err, result) {
-            connection.end();
-            for(var i = 0; i < result.length; ++i) {
-                if(text.includes(result[i].text)) {
-                    resolve(true);
-                    return;
-                }
-            }
-            resolve(false);
-        });
-    });
-}
-
-/**
  * @function connectMySql
  * @description 创建一个数据库连接。由于 mysql 连接数据库的代码有点长（？），所以写了一个函数来简化一下
  * @return {Object} connection - 数据库的一个连接
@@ -194,7 +157,6 @@ module.exports = {
     getQuestion,
     getDiscussId,
     isAllowedId,
-    isOrzLemonText,
     connectMySql,
     isset,
     filter,

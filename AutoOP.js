@@ -30,11 +30,6 @@ function executeAutoOP(bot) {
     bot.on('new_chat_members', (newMembers)=> {
         verify(bot, newMembers);
     });
-
-    // 控制出现「膜了 Lemon」的频率
-    bot.on('text', (msg) => {
-        limitOrzLemon(bot, msg);
-    });
 }
 
 /**
@@ -141,66 +136,6 @@ function failToVerify(bot, newMembers) {
     var msg = '验证失败，请联系管理员解封。'
     bot.restrictChatMember(chatId, userId);
     bot.sendMessage(chatId, msg, form);
-}
-
-/**
- * @function limitOrzLemon
- * @description 限制膜柠檬的频率
- * @param {Object} bot
- * @param {Object} msg - Message 格式，柠檬被膜的消息
- */
-async function limitOrzLemon(bot, msg) {
-    // 判断 bot 所在群是否是已经授权的群
-    const chatId = msg.chat.id;
-    if (! await functions.isAllowedId(chatId)) {
-        return;
-    }
-
-    // 如果是柠檬自己发的消息就跳过
-    if(config.lemonId == msg.from.id) {
-        return;
-    }
-
-    // 检测是不是在膜柠檬
-    var isOrzLemonText = await functions.isOrzLemonText(functions.filter(msg.text));
-
-    if (isOrzLemonText === false) {
-        return;
-    }
-    // alert 说明经过过滤之后的消息为空，即所有字符都不属于大小写字母、数字、中文，很可能是群友在说火星文（大雾
-    else if (isOrzLemonText === "alert") {
-        const alertForm = {
-            'parse_mode': 'HTML',   // 设置消息的解析模式
-            'disable_notification': true,
-            'reply_to_message_id': msg.message_id,
-        };
-        bot.sendMessage(chatId, "qwq 我好像不懂你在说什么", alertForm);
-        return;
-    }
-
-    const msgId = msg.message_id;
-    //让我看看是哪个调皮的群友又在膜柠檬了
-    const orzFromFirstName = functions.isset(msg.from.first_name) ? functions.htmlEncode(msg.from.first_name) : '';
-    const orzFromLastName = functions.isset(msg.from.last_name) ? ' ' + functions.htmlEncode(msg.from.last_name) : '';
-    const orzFromName = orzFromFirstName + orzFromLastName;
-    const orzFromId = msg.from.id;
-
-    //设置定时器，判断距离上一次柠檬被膜有没有超过 24h
-    var replyMsg;
-    if (canOrzLemon) {
-        canOrzLemon = false;
-        const timeoutObj = setTimeout(() => {
-            canOrzLemon = true;
-        }, 1000 * 60 * 60 * 24);
-
-        replyMsg = `哇！菜鸡柠檬被膜了！谢谢大佬 <a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a>`;
-    }
-    else {
-        replyMsg = `大家一天只能膜一次菜鸡柠檬啦！不然它会膨胀的 qwq`;
-        bot.deleteMessage(chatId, msgId);
-    }
-
-    bot.sendMessage(chatId, replyMsg, form);
 }
 
 /**

@@ -21,13 +21,10 @@ function dealWithCommand(bot) {
     bot.onText(/^(\/orz|\/orz@Lemonaires_bot)$/, (msg, match) => {
         orz(bot, msg);
     });
+
     // /ping
     bot.onText(/^(\/ping|\/ping@Lemonaires_bot)$/, (msg, match) => {
         ping(bot, msg);
-    });
-    // /reportOrzLemonText
-    bot.onText(/^(\/report_orz_lemon_text|\/report_orz_lemon_text@Lemonaires_bot)$/, (msg,match) => {
-        reportOrzLemonText(bot, msg);
     });
 
     // /mute
@@ -113,43 +110,6 @@ async function ping(bot, msg) {
     //存活测试的回复
     msgText = `ping pong boom ping pong ping ping boom ping ping boom ping ping ping pong boom ping`;
     bot.sendMessage(chatId, msgText, form);
-}
-
-/**
- * @function reportOrzLemonText
- * @description 报告膜柠檬的消息文本，将这段文本加入数据库中
- * @param {Object} bot
- * @param {Object} msg - Message 格式，收到的 /reportOrzLemonText 指令消息
- */
-function reportOrzLemonText(bot, msg) {
-    var chatId = msg.chat.id;
-
-    // 这个指令只能柠檬自己用，所以要判断是不是柠檬本萌（逃）。如果不是，则禁言两分钟
-    if(msg.from.id != config.lemonId) {
-        // until_date 的参数是 unix time，精确到 s，Date.now() 返回的时间戳精确到毫秒，所以要 / 1000，计算得到的是浮点数，要取整
-        bot.restrictChatMember(chatId, msg.from.id, {'until_date': Math.floor((Date.now() + 120000) / 1000)});
-        bot.sendMessage(chatId, "report_orz_lemon_text 这条指令只能柠檬用哦~乱用的小可爱会被禁言两分钟嘻嘻~", form);
-        bot.deleteMessage(chatId, msg.message_id);
-        return;
-    }
-
-    // 判断是否回复了消息，如无回复则发送错误提示
-    if(functions.isset(msg.reply_to_message)) {
-        // 向数据库加入消息文本
-        var sql = 'insert into orz_lemon_text(text) values(?)';
-        var parameter = [functions.filter(msg.reply_to_message.text)];
-        var connection = functions.connectMySql();
-        connection.query(sql, parameter, function(err, result, callback) {
-            connection.end();
-        });
-
-        bot.sendMessage(chatId, "done!", form);
-    }
-    else {
-        bot.sendMessage(chatId, "需要回复一条消息来 report", form);
-    }
-
-    bot.deleteMessage(chatId, msg.message_id);
 }
 
 /**
