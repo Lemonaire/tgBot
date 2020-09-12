@@ -54,7 +54,8 @@ async function fwChPost(bot, chPost) {
 async function verify(bot, newMembers) {
     // 判断 bot 所在群是否是已经授权的群
     var chatId = newMembers.chat.id;
-    if (! await functions.isAllowedId(chatId)) {
+    var newChatMemberId = newMembers.new_chat_member.id;
+    if ((! await functions.isAllowedId(chatId, `group`) || await functions.isAllowedId(newChatMemberId, `bot`))) {
         return;
     }
 
@@ -62,10 +63,10 @@ async function verify(bot, newMembers) {
     * @todo 设置 bot 白名单，通过申请的 bot 可以加群
     */
     //禁止其他 bot 进群
-    if (newMembers.new_chat_member.is_bot === true && newMembers.new_chat_member.id !== config.testBotId && newMembers.new_chat_member.id !== config.lemonBotId) {
+    if (newMembers.new_chat_member.is_bot === true) {
         banBotText = `为了防止调皮的群友做出奇奇怪怪的事情，所以本群不允许陌生的 bot 进群~（菜鸡柠檬正在努力加上白名单功能）`;
-        bot.restrictChatMember(chatId, newMembers.new_chat_member.id);
-        bot.kickChatMember(chatId, newMembers.new_chat_member.id);
+        bot.restrictChatMember(chatId, newChatMemberId);
+        bot.kickChatMember(chatId, newChatMemberId);
         bot.sendMessage(chatId, banBotText, form);
         return;
     }
@@ -105,7 +106,8 @@ async function verify(bot, newMembers) {
             const orzToFirstName = functions.isset(newMembers.new_chat_member.first_name) ? functions.htmlEncode(newMembers.new_chat_member.first_name) : '';
             const orzToLastName = functions.isset(newMembers.new_chat_member.last_name) ? ' ' + functions.htmlEncode(newMembers.new_chat_member.last_name) : '';
             const orzToName = orzToFirstName + orzToLastName;
-            const orzToId = newMembers.new_chat_member.id;
+            // @todo 重写这部分代码，将 orzToId 去掉，直接调用 newCHatMemberId
+            const orzToId = newChatMemberId;
 
             // 发送验证成功的通知（包含入群又退群等意外情况）
             var replyMsg = await bot.getChatMember(chatId, orzToId);

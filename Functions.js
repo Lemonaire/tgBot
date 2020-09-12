@@ -50,12 +50,13 @@ function getDiscussId(msg) {
 
 /**
  * @function isAllowedId
- * @description 查询数据库，判断是否是被授权的 id（包括 user id 和 chat id 两种）
+ * @description 查询数据库，判断是否是被授权的 id（包括 user id 和 chat id 两种），支持按照类型查找，类型有：group, bot, user
  * @param {Number} chatId - 需要判断的 id
+ * @param {String} type - 需要判断的类型
  * @return {Promise} - boolean 是否被授权
  */
-function isAllowedId(chatId) {
-    var sql = 'select chatId from allowed_id';
+function isAllowedId(chatId, type) {
+    var sql = `select chatId from allowed_id where type = "${type}"`;
     var connection = connectMySql();
     // 由于 nodejs 的异步处理操作，只能通过 Promise 对象把 sql 结果集或经过处理以后的结果返回出去
     return new Promise((resolve,reject)=>{

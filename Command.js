@@ -51,7 +51,7 @@ function dealWithCommand(bot) {
 async function orz(bot, msg) {
     // 判断 bot 所在群是否是已经授权的群
     var chatId = msg.chat.id;
-    if (! await functions.isAllowedId(chatId)) {
+    if (! await functions.isAllowedId(chatId, `group`)) {
         return;
     }
 
@@ -102,7 +102,7 @@ async function orz(bot, msg) {
 async function ping(bot, msg) {
     // 判断 bot 所在群是否是已经授权的群
     var chatId = msg.chat.id;
-    if (! await functions.isAllowedId(chatId)) {
+    if (! await functions.isAllowedId(chatId, `group`)) {
         return;
     }
 
@@ -125,7 +125,7 @@ function mute(bot, msg) {
     if(msg.from.id != config.lemonId) {
         // until_date 的参数是 unix time，精确到 s，Date.now() 返回的时间戳精确到毫秒，所以要 / 1000，计算得到的是浮点数，要取整
         bot.restrictChatMember(chatId, msg.from.id, {'until_date': Math.floor((Date.now() + 60000) / 1000)});
-        bot.sendMessage(chatId, "report_orz_lemon_text 这条指令只能柠檬用哦~乱用的小可爱会被禁言一分钟嘻嘻~", form);
+        bot.sendMessage(chatId, "mute 这条指令只能柠檬用哦~乱用的小可爱会被禁言一分钟嘻嘻~", form);
         bot.deleteMessage(chatId, msg.message_id);
         return;
     }

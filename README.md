@@ -17,8 +17,8 @@ Defined some automatic operations.
 Defined some bot commands.  
 1. orz command.  Everyone except lemon could be orzed by using this command.  
 2. ping command. Make sure that the bot is working.  
-3. report_orz_lemon_text command. When the group members try to orz lemon, lemon could use this command to report the text. Then the text will be inserted into the database, so that it will be detected automatically next time.  
-4. mute. Lemon can use this command to mute one of the chat members for five minutes.  
+3. <del>report_orz_lemon_text command. When the group members try to orz lemon, lemon could use this command to report the text. Then the text will be inserted into the database, so that it will be detected automatically next time.</del>  
+4. mute. Lemon can use this command to mute one of the chat members for five minutes, though it seems to be useless.  
 
 ### config.js  
 Defined the configuration.  
@@ -39,7 +39,7 @@ It includes:
 Defined some frequently-used or useful functions.  
 1. getQuestion. To get a random question from the database, usually used to verify the new chat members.  
 2. getDiscussId. To get the chat id of a discuss group which is linked to the specific channel.  
-3. isAllowedId. To judge whether the chat id is allowed or not, so that others couldn't use this bot without permission.  
+3. isAllowedId. To judge whether the chat id is allowed or not, so that others couldn't use this bot without permission. Also used to judge whether a bot is allowed.  
 4. isOrzLemonText. To judge whether someone is trying to orz lemon, used in the command `report_orz_lemon_text`.  
 5. isset. To judge whether a parameter has been set.  
 6. filter. To filter all characters except letters, digits and Chinese characters.  
