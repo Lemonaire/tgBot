@@ -1,7 +1,7 @@
 /**
  * @fileOverview 定义一些底层方法
  * @author Lemonaire
- * @version 2.2
+ * @version 2.3
  * @requires config
  */
 const config = require('./config.js');
@@ -44,6 +44,30 @@ function getDiscussId(msg) {
                 var chatId = result[0].discussId;
             }
             resolve(chatId);
+        });
+    });
+}
+
+/**
+ * @function getMissInfo
+ * @description 查询数据库，根据发送者的 id 找到对应的接收者和需要的 nickname
+ * @param {Number} senderId - 消息发送者的 id
+ * @return {Promise} result - json 格式，包含了 sender, receiver, name
+ */
+function getMissInfo(senderId) {
+    var sql = 'select * from miss_list where sender = "?"';
+    var parameter = [senderId];
+    var connection = connectMySql();
+    return new Promise((resolve, reject) => {
+        connection.query(sql, parameter, function(err, result) {
+            sql = 'update miss_list set times = times + 1 where sender = "?"';
+            parameter = [senderId];
+            connection.query(sql, parameter);
+            connection.end();
+            if(isset(result[0])) {
+                resolve(result[0]);
+            }
+            resolve(null);
         });
     });
 }
@@ -98,19 +122,6 @@ function isset(a){
 }
 
 /**
- * @function filter
- * @description 过滤字符串，删除其中的中英文符号，并将所有字母改成小写
- * @param {String} str - 需要过滤的字符串
- * @returns {String} str - 过滤处理后的字符串
- */
-function filter(str) {
-    // 只保留大小写字母、数字、中英文常用符号和非扩展的中文字符
-    str = str.replace(/[^！￥·…（）—《》？。，；“”‘’： ~`!@#$%^&*()-_+=|\[\]{};:"',<.>\/?\\a-zA-Z0-9\u4e00-\u9fa5]/g,"");
-    str = str.toLowerCase();    // 转小写
-    return str;
-}
-
-/**
  * @function htmlEncode
  * @description html字符转义
  * @param str - 需要转义的字符串
@@ -157,10 +168,10 @@ function htmlDecode(str) {
 module.exports = {
     getQuestion,
     getDiscussId,
+    getMissInfo,
     isAllowedId,
     connectMySql,
     isset,
-    filter,
     htmlEncode,
     htmlDecode,
 }

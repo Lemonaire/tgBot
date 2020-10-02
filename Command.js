@@ -1,7 +1,7 @@
 /**
  * @fileOverview 对 bot 收到的指令进行处理
  * @author Lemonaire
- * @version 2.2
+ * @version 2.3
  * @requires Functions
  * @requires config
  * @todo 被膜排行榜
@@ -11,6 +11,7 @@
 const functions = require('./Functions.js');
 const config = require('./config.js');
 const form = config.form;
+
 /**
  * @function dealWithCommand
  * @description 暴露给外部的 index.js 来处理所有的 bot 指令
@@ -31,6 +32,12 @@ function dealWithCommand(bot) {
     bot.onText(/^(\/mute|\/mute@Lemonaires_bot)$/, (msg,match) => {
         mute(bot, msg);
     });
+
+    // /miss
+    bot.onText(/^(\/miss|\/miss@Lemonaires_bot)$/, (msg,match) => {
+        miss(bot, msg);
+    });
+
 }
 
 // 可能会加上的 /echo 指令
@@ -71,15 +78,17 @@ async function orz(bot, msg) {
         const orzToId = msg.reply_to_message.from.id;
 
         var replyMsg;
+        var orzForm = {
+            'parse_mode': 'HTML',   // 设置消息的解析模式
+            'reply_to_message_id': msg.reply_to_message.message_id,   // 设置发送消息的模式是回复，回复的消息为被膜的消息
+            'disable_notification': true,
+        };
+
         // 膜自己
         if (orzFromId === orzToId) {
             replyMsg = `<a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a> 膜了 自己`;
         }
-        // 不能膜 Lemon，变成 Lemon 膜别人，bot 重定向到 Lemon
-        else if(config.lemonId === orzToId || config.lemonBotId === orzToId) {
-            replyMsg = `柠檬太菜了，应该它来膜您！\n<a href = 'tg://user?id=${config.lemonId}'>${config.lemonName}</a> 膜了 <a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a>`;
-        }
-        // 正常的膜大佬
+        // 膜大佬
         else {
             replyMsg = `<a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a> 膜了 <a href = 'tg://user?id=${orzToId}'>${orzToName}</a>`;
         }
@@ -87,10 +96,11 @@ async function orz(bot, msg) {
     // 膜全体群友
     else {
         replyMsg = `<a href = 'tg://user?id=${orzFromId}'>${orzFromName}</a> 膜了 全体群友`;
+        orzForm = form;
     }
 
     bot.deleteMessage(chatId, msgId);
-    bot.sendMessage(chatId, replyMsg, form);
+    bot.sendMessage(chatId, replyMsg, orzForm);
 }
 
 /**
@@ -102,7 +112,8 @@ async function orz(bot, msg) {
 async function ping(bot, msg) {
     // 判断 bot 所在群是否是已经授权的群
     var chatId = msg.chat.id;
-    if (! await functions.isAllowedId(chatId, `group`)) {
+    // @todo 重写这里的 sql 语句，使之看起来简短一点
+    if ((!await functions.isAllowedId(chatId, `group`)) || (!await functions.isAllowedId(chatId, `user`))) {
         return;
     }
 
@@ -118,14 +129,14 @@ async function ping(bot, msg) {
  * @param {Object} bot
  * @param {Object} msg - Message 格式，收到的 /mute 指令消息
  */
-function mute(bot, msg) {
+async function mute(bot, msg) {
     var chatId = msg.chat.id;
 
-    // 这个指令只能柠檬自己用，所以要判断是不是柠檬本萌（逃）。如果不是，则禁言一分钟
-    if(msg.from.id != config.lemonId) {
+    // 判断消息是否来自已授权的用户
+    if(! await functions.isAllowedId(msg.from.id, `user`)) {
         // until_date 的参数是 unix time，精确到 s，Date.now() 返回的时间戳精确到毫秒，所以要 / 1000，计算得到的是浮点数，要取整
         bot.restrictChatMember(chatId, msg.from.id, {'until_date': Math.floor((Date.now() + 60000) / 1000)});
-        bot.sendMessage(chatId, "mute 这条指令只能柠檬用哦~乱用的小可爱会被禁言一分钟嘻嘻~", form);
+        bot.sendMessage(chatId, "mute 这条指令不能乱用的哦~乱用的小可爱会被禁言一分钟嘻嘻~", form);
         bot.deleteMessage(chatId, msg.message_id);
         return;
     }
@@ -142,6 +153,25 @@ function mute(bot, msg) {
     bot.deleteMessage(chatId, msg.message_id);
 }
 
+/**
+ * @function miss
+ * @description 可以方便地发送想某人的消息
+ * @param {Object} bot
+ * @param {Object} msg - Message 格式，收到的 /miss 指令消息
+ */
+async function miss(bot, msg) {
+    var senderId = msg.chat.id;
+    var result = await functions.getMissInfo(senderId);
+
+    // 判断发消息的用户是不是已经被加进 miss_list
+    if(functions.isset(result)) {
+        var msgText = `${result.name}想你了`;
+        bot.sendMessage(result.receiver, msgText, form);
+        bot.sendMessage(result.sender, "done", form);
+    }
+
+    bot.deleteMessage(senderId, msg.message_id);
+}
 
 /**
  * @description 处理所有的 bot 指令

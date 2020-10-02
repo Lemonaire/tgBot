@@ -11,14 +11,15 @@
 Defined some automatic operations.  
 1. forward the specific channel's post to the discuss group.  
 2. verify the new chat members, and restrict the bots to join the chat.  
-3. limit orzing lemon.  
+3. ~~limit orzing lemon.~~  
 
 ### Command.js  
 Defined some bot commands.  
-1. orz command.  Everyone except lemon could be orzed by using this command.  
+1. orz command.  Everyone could be orzed by using this command.  
 2. ping command. Make sure that the bot is working.  
-3. <del>report_orz_lemon_text command. When the group members try to orz lemon, lemon could use this command to report the text. Then the text will be inserted into the database, so that it will be detected automatically next time.</del>  
-4. mute. Lemon can use this command to mute one of the chat members for five minutes, though it seems to be useless.  
+3. ~~report_orz_lemon_text command. When the group members try to orz lemon, lemon could use this command to report the text. Then the text will be inserted into the database, so that it will be detected automatically next time.~~  
+4. mute command. Lemon can use this command to mute one of the chat members for five minutes, though it seems to be useless.  
+5. miss command. Lemon and mathlover can use this command to send miss messages to each other quickly and conveniently.  
 
 ### config.js  
 Defined the configuration.  
@@ -39,12 +40,14 @@ It includes:
 Defined some frequently-used or useful functions.  
 1. getQuestion. To get a random question from the database, usually used to verify the new chat members.  
 2. getDiscussId. To get the chat id of a discuss group which is linked to the specific channel.  
-3. isAllowedId. To judge whether the chat id is allowed or not, so that others couldn't use this bot without permission. Also used to judge whether a bot is allowed.  
-4. isOrzLemonText. To judge whether someone is trying to orz lemon, used in the command `report_orz_lemon_text`.  
-5. isset. To judge whether a parameter has been set.  
-6. filter. To filter all characters except letters, digits and Chinese characters.  
-7. htmlEncode. To transfer meaning of some html characters so that the injection could be avoided, especially in the command `orz`.  
-8. htmlDecode. This function is never used, just to make pairs of the function `htmlEncode`.  
+3. getMissInfo. To get information of the `miss` command's sender and the receiver.  
+4. isAllowedId. To judge whether the chat id is allowed or not, so that others couldn't use this bot without permission. Also used to judge whether a bot is allowed.  
+5. connectMySql. To connect to the mysql conveniently.  
+6. ~~isOrzLemonText. To judge whether someone is trying to orz lemon, used in the command `report_orz_lemon_text`.~~  
+7. isset. To judge whether a parameter has been set.  
+8. ~~filter. To filter all characters except letters, digits and Chinese characters.~~  
+9. htmlEncode. To transfer meaning of some html characters so that the injection could be avoided, especially in the command `orz`.  
+10. htmlDecode. This function is never used, just to make pairs of the function `htmlEncode`.  
 
 ### index.js  
 Create an instance of telegram bot and run it.  

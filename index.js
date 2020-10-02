@@ -28,7 +28,6 @@ const bot = new TelegramBot(config.lemonTestBotToken, {
         }
     }
 });
-
 // 运行 bot
 command.dealWithCommand(bot);
 autoOP.executeAutoOP(bot);

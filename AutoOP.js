@@ -12,9 +12,6 @@ const config = require('./config.js');
 const functions = require('./Functions.js');
 const form = config.form;
 
-// 现在可以膜柠檬了吗！
-var canOrzLemon = true;
-
 /**
  * @function executeAutoOP
  * @description 暴露给外部的 index.js 来执行所有的自动操作
@@ -41,7 +38,7 @@ function executeAutoOP(bot) {
 async function fwChPost(bot, chPost) {
     var chatId = await functions.getDiscussId(chPost);    // 判断 Channel 是否已经授权，如果授权，返回对应的 Discuss ID
     if (functions.isset(chatId)) {
-        bot.forwardMessage(chatId, chPost.chat.id, chPost.message_id);
+        bot.forwardMessage(chatId, chPost.chat.id, chPost.message_id, {'disable_notification': true});
     }
 }
 
@@ -55,7 +52,8 @@ async function verify(bot, newMembers) {
     // 判断 bot 所在群是否是已经授权的群
     var chatId = newMembers.chat.id;
     var newChatMemberId = newMembers.new_chat_member.id;
-    if ((! await functions.isAllowedId(chatId, `group`) || await functions.isAllowedId(newChatMemberId, `bot`))) {
+    // @todo 重写这里的 sql 语句，使之看起来简短一点
+    if ((! await functions.isAllowedId(chatId, `group`) || await functions.isAllowedId(newChatMemberId, `bot`) || await functions.isAllowedId(newChatMemberId, `user`))) {
         return;
     }
 
@@ -106,7 +104,7 @@ async function verify(bot, newMembers) {
             const orzToFirstName = functions.isset(newMembers.new_chat_member.first_name) ? functions.htmlEncode(newMembers.new_chat_member.first_name) : '';
             const orzToLastName = functions.isset(newMembers.new_chat_member.last_name) ? ' ' + functions.htmlEncode(newMembers.new_chat_member.last_name) : '';
             const orzToName = orzToFirstName + orzToLastName;
-            // @todo 重写这部分代码，将 orzToId 去掉，直接调用 newCHatMemberId
+            // @todo 重写这部分代码，将 orzToId 去掉，直接调用 newChatMemberId
             const orzToId = newChatMemberId;
 
             // 发送验证成功的通知（包含入群又退群等意外情况）
@@ -150,7 +148,7 @@ module.exports = {
 
 // 一段我也不知道会不会有用的代码，所以先留着吧……
 //get chatid
-// bot.getChat('@username').then(function(chat) {
+// bot.getChat('@mathlover').then(function(chat) {
 //   console.log(chat.id);
 // })
 
